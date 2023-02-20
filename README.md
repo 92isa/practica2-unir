@@ -1,5 +1,8 @@
 Caso práctico 2: Automatización de despliegues en entornos Cloud
 
+La rama para el desarrollo del código y las pruebas sera Develop
+La rama donde se apliquen los cambios para llevarlos a producción sera la Master
+
 El caso práctico 2 se enfoca en despliegues de aplicaciones sobre un
 proveedor de Cloud mediante el uso de herramientas DevOps
 
