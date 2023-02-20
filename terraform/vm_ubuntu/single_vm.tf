@@ -1,8 +1,12 @@
+# Propiedades que queremos que tenga la vm que vamos a crear
+# Indicamos el grupo de recursos de azure donde va a estar esta vm
+
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location_name
 }
 
+# Caracteristicas de la red virtual de la vm
 resource "azurerm_virtual_network" "vnet" {
   name                = var.network_name
   address_space       = ["10.0.0.0/16"]
@@ -10,6 +14,7 @@ resource "azurerm_virtual_network" "vnet" {
   resource_group_name = azurerm_resource_group.rg.name
 }
 
+# Caracteristicas de la subnet de la vm
 resource "azurerm_subnet" "subnet" {
   name                 = var.subnet_name
   resource_group_name  = azurerm_resource_group.rg.name
