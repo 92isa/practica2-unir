@@ -39,13 +39,13 @@ resource "azurerm_linux_virtual_machine" "vm" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   size                = "Standard_F2"
-  admin_username      = "azureuser"
+  admin_username      = "azureusr"
   network_interface_ids = [
     azurerm_network_interface.nic.id,
   ]
 
   admin_ssh_key {
-    username   = "azureuser"
+    username   = "azureusr"
     public_key = file("~/.ssh/id_rsa.pub")
   }
 
@@ -57,7 +57,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   source_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
+    sku       = "22.04-LTS"
     version   = "latest"
   }
 }
