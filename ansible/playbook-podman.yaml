@@ -1,0 +1,31 @@
+- name: Playbook vm-podman-inst
+  hosts: all
+  remote_user: azure-user
+  become: true
+
+  tasks:
+    - name: Ubuntu | Add an Apt signing key used for podman repo
+      apt_key:
+        url: "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/Release.key"
+        state: present
+    - name: Ubuntu | Add podman repository
+      become: true
+      become_user: root
+      apt_repository:
+        repo: "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04 /"
+        filename: podman
+      register: podman_apt_repo
+    - name: Ubuntu | Upgrade System before install
+      apt:  
+        upgrade: dist
+      when: podman_apt_repo.changed
+    - name: Ubuntu | Install libglib2.0
+      become: true
+      become_user: root
+      apt:
+        name: libglib2.0-0
+    - name: Update apt-get repo and cache
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+    - name: Instalar Podman
+      ansible.builtin.apt:
+        name: podman

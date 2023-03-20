@@ -1,0 +1,76 @@
+- name: Playbook webserver-deploy
+  hosts: all
+  remote_user: azure-user
+  become: true
+
+  tasks:
+## Instalacion de paquetes necesarios
+    - name: Install Python pip
+      ansible.builtin.apt:
+        name: python-pip
+    - name: Install Python pip
+      ansible.builtin.apt:
+        name: python3
+    - name: Instalacion del componente passlib con python
+      pip: name=passlib
+    - name: Instalar Openssl
+      ansible.builtin.apt:
+        name: openssl
+        state: present
+    - name: Instalar apache2
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+## Preparacion del entorno para lanzar el webserver
+    - name: Crear un directorio
+      ansible.builtin.file:
+        path: "/webserver"
+        state: directory
+    - name: Fichero para almacenar las credenciales para autenticarse en el servidor web
+      community.general.htpasswd:
+        path: "webserver/auth"
+        name: "user-webserver"
+        password: "password"
+    - name: Index.html del webserver
+      ansible.builtin.copy:
+        src: ./webserver_conf/index.html
+        dest: "webserver/index.html"
+    - name: config webserver
+      ansible.builtin.copy:
+        src: ./webserver_conf/httpd.conf
+        dest: "webserver/httpd.conf"
+    - name: config autenticacon del webserver
+      ansible.builtin.copy:
+        src: ./webserver_conf/.htaccess
+        dest: "webserver/.htaccess"
+    - name: Crear la imagen del contenedor
+      ansible.builtin.copy:
+        src: ./webserver_conf/Containerfile
+        dest: "webserver/Containerfile"
+## Construccion de la imagen podman y despliegue
+    - name: Generar la imagen del contenedor para podman
+      become: true
+      become_user: root
+      become_method: sudo
+      containers.podman.podman_image:
+        name: webapp-apache
+        path: "webserver"
+    - name: Descargar imagen
+      containers.podman.podman_image:
+        name: webapp-apache
+    - name: Copia de los ficheros en el home
+      copy:
+        src: /root/ws1/index.html
+        dest: /home
+    - name: run httpd container
+      containers.podman.podman_container:
+        name: webserver
+        image: webapp-apache
+        state: started
+        detach: true
+        expose:
+          - 80
+        ports:
+          - 8080:80
+        volume:
+          - "{{ webroot }}:/usr/local/apache2/htdocs/:exec"
